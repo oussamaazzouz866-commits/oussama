@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>StudyGram - منصة الدراسة الطلابية الكاملة (STUDY-2026)</title>
+  <meta name="theme-color" content="#0f172a" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Cairo', sans-serif; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.4); }
+    ::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.4); border-radius: 9999px; }
+  </style>
+</head>
+<body class="h-screen w-full overflow-hidden flex flex-col bg-slate-950 text-slate-100 select-none">
+
+  <!-- الشريط العلوي الكامل -->
+  <header class="h-14 px-4 bg-slate-900/95 border-b border-slate-800 flex items-center justify-between shrink-0 z-30">
+    <div class="flex items-center gap-3">
+      <button onclick="toggleMobileSidebar()" class="lg:hidden p-2 rounded-xl hover:bg-slate-800 text-slate-300">☰</button>
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white font-bold shadow-md">🎓</div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-bold text-base">StudyGram</h1>
+            <span class="text-[11px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 font-medium">نسخة الطلبة الكاملة</span>
+          </div>
+          <p class="text-[11px] text-slate-400 hidden sm:block">منصة التواصل والمكتبة الجامعية المشتركة</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- شريط البحث -->
+    <div class="flex-1 max-w-md mx-4 hidden md:block">
+      <input id="searchInput" oninput="handleSearch(this.value)" type="text" placeholder="🔍 ابحث في المحاضرات، الملخصات، أو الشروحات الصوتية..." class="w-full px-4 py-1.5 rounded-xl text-xs bg-slate-800/90 border border-slate-700 text-slate-100 placeholder-slate-400 outline-none focus:border-indigo-500" />
+    </div>
+
+    <!-- أزرار التحكم العلوية -->
+    <div class="flex items-center gap-2">
+      <button onclick="openInviteModal()" class="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-sm">
+        <span>👤+ دعوة الأصدقاء</span>
+        <span id="headerRoomBadge" class="px-1.5 py-0.5 rounded bg-black/25 font-mono text-[10px]">STUDY-2026</span>
+      </button>
+      <button onclick="switchLeftTab('tools')" class="px-3 py-1.5 rounded-xl text-xs font-medium hidden sm:flex items-center gap-1.5 bg-slate-800 border border-slate-700 text-slate-200 hover:bg-slate-700">
+        <span>⏱️</span>
+        <span id="headerPomodoro">25:00</span>
+      </button>
+      <button onclick="toggleLeftDrawer()" class="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white">
+        <span>👥 الزملاء والمكتبة</span>
+        <span id="headerStudentsCount" class="px-1.5 py-0.2 rounded-full bg-white/20 text-[10px]">4</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- الجسم الرئيسي ذو الـ 3 أعمدة -->
+  <div class="flex-1 flex overflow-hidden relative">
+    <!-- 1. القائمة اليمنى: المقاييس والقنوات الدراسية -->
+    <aside id="rightSidebar" class="hidden lg:flex lg:w-72 flex-col border-l border-slate-800 bg-slate-900 shrink-0 z-40">
+      <div class="p-3 border-b border-slate-800 bg-slate-950/50">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <div id="profileAvatar" class="w-8 h-8 rounded-xl bg-indigo-600 text-white font-bold text-xs flex items-center justify-center shrink-0">طج</div>
+            <div class="min-w-0">
+              <div id="profileName" class="font-bold text-xs truncate">طالب جامعي</div>
+              <div id="profileGroup" class="text-[10px] text-emerald-400 truncate">الفوج 01 - إلكتروميكانيك</div>
+            </div>
+          </div>
+          <button onclick="openOnboardingModal()" class="text-[10px] px-2 py-1 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700">تعديل</button>
+        </div>
+        <button onclick="openInviteModal()" class="w-full py-1.5 px-2.5 rounded-xl bg-indigo-600/15 hover:bg-indigo-600/25 border border-indigo-500/30 text-indigo-300 text-xs font-semibold flex items-center justify-between">
+          <span>✨ إدخال الأصدقاء للدفعة</span>
+          <span id="sidebarRoomCode" class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20">STUDY-2026</span>
+        </button>
+      </div>
+
+      <div class="p-3 border-b border-slate-800/60 flex items-center justify-between">
+        <div>
+          <h2 class="text-xs font-bold text-indigo-400">المقاييس الدراسية (السداسي 1)</h2>
+          <p class="text-[11px] text-slate-400 mt-0.5">اختر المقياس والقناة الدراسية</p>
+        </div>
+      </div>
+
+      <div id="subjectsContainer" class="flex-1 overflow-y-auto p-2.5 space-y-2"></div>
+
+      <div class="p-3.5 border-t border-slate-800 bg-slate-900/90 text-xs">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-slate-400 font-medium">سحابة الدفعة المجانية</span>
+          <span class="text-emerald-400 font-bold">1.4 / 10 GB</span>
+        </div>
+        <div class="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
+          <div class="h-full w-[14%] bg-gradient-to-r from-indigo-500 to-emerald-400 rounded-full"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 2. المنطقة الوسطى: المحادثة والدروس والصوتيات -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-950">
+      <div class="px-4 py-2.5 border-b border-slate-800 bg-slate-900/70 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <span id="activeChannelIcon" class="text-xl">💬</span>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <h2 id="activeChannelName" class="font-bold text-sm truncate">النقاش العام</h2>
+              <span id="activeSubjectBadge" class="text-[11px] px-2 py-0.5 rounded-md bg-indigo-500/15 text-indigo-400 font-medium">الإلكتروميكانيك والأنظمة</span>
+            </div>
+            <p class="text-[11px] text-slate-400 truncate">جميع الملفات والصوتيات تحفظ تلقائياً في المكتبة الذكية</p>
+          </div>
+        </div>
+        <button onclick="openUploadModal()" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm">
+          <span>＋ نشر درس / ملف</span>
+        </button>
+      </div>
+
+      <!-- قائمة الرسائل -->
+      <div id="messagesList" class="flex-1 overflow-y-auto p-4 space-y-4"></div>
+
+      <!-- شريط الإرسال والتسجيل الصوتي السفلي -->
+      <div class="p-3 border-t border-slate-800 bg-slate-900 shrink-0">
+        <div id="recordingBar" class="hidden flex-wrap items-center justify-between gap-2 p-2.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 mb-2">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-rose-500 animate-ping inline-block"></span>
+            <span class="text-xs font-bold text-rose-400">جاري التسجيل الصوتي (<span id="recTimer">00:00</span>)</span>
+          </div>
+          <input id="voiceTitleInput" type="text" placeholder="عنوان الشرح الصوتي (اختياري)..." class="flex-1 min-w-[180px] px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white outline-none" />
+          <div class="flex items-center gap-2">
+            <button onclick="cancelRecording()" type="button" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs">إلغاء</button>
+            <button onclick="finishRecording()" type="button" class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">إرسال الشرح الصوتي 🎙️</button>
+          </div>
+        </div>
+
+        <form onsubmit="sendTextMessage(event)" class="space-y-2">
+          <div id="tagsBar" class="flex items-center gap-1.5 overflow-x-auto pb-0.5"></div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="openUploadModal()" class="p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-indigo-400 hover:bg-slate-700" title="إرفاق ملف أو صورة">📎</button>
+            <button type="button" onclick="startRecording()" class="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25" title="تسجيل شرح صوتي">🎙️</button>
+            <input id="chatTextInput" type="text" placeholder="اكتب سؤالك، ملخصك، أو مشاركتك للدفعة..." class="flex-1 px-4 py-2.5 rounded-xl text-xs sm:text-sm bg-slate-800 border border-slate-700 text-white placeholder-slate-400 outline-none focus:border-indigo-500" />
+            <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs sm:text-sm">إرسال ➤</button>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <!-- 3. اللوحة اليسرى: الزملاء والمكتبة الذكية وأدوات المراجعة -->
+    <aside id="leftDrawer" class="w-80 border-r border-slate-800 bg-slate-900 flex flex-col shrink-0">
+      <div class="p-3.5 border-b border-slate-800 flex items-center justify-between">
+        <h3 class="font-bold text-sm text-indigo-300">✨ الزملاء والمكتبة الذكية</h3>
+        <button onclick="toggleLeftDrawer()" class="p-1 rounded-lg text-slate-400 hover:bg-slate-800">✕</button>
+      </div>
+      <div id="leftTabsBar" class="grid grid-cols-6 gap-1 p-2 border-b border-slate-800 text-[10px]"></div>
+      <div id="leftDrawerContent" class="flex-1 overflow-y-auto p-3 space-y-2.5"></div>
+    </aside>
+  </div>
+
+  <!-- نافذة تسجيل دخول الطالب -->
+  <div id="onboardingModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-2xl">🎓</div>
+        <div>
+          <h2 class="font-extrabold text-lg">مرحباً بك في StudyGram</h2>
+          <p class="text-xs text-slate-400">سجّل اسمك وكود الدفعة للدخول مع أصدقائك</p>
+        </div>
+      </div>
+      <form onsubmit="saveOnboarding(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">الاسم واللقب:</label>
+          <input id="onbName" type="text" required placeholder="مثال: أمين بوقرة" class="w-full px-3.5 py-2.5 rounded-xl text-xs bg-slate-800 border border-slate-700 text-white outline-none" />
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">الفوج:</label>
+            <select id="onbGroup" class="w-full px-3 py-2.5 rounded-xl text-xs bg-slate-800 border border-slate-700 text-white">
+              <option>الفوج 01 - إلكتروميكانيك</option>
+              <option>الفوج 02 - إلكتروميكانيك</option>
+              <option>الفوج 03 - إعلام آلي</option>
+              <option>الفوج 04 - علوم وتكنولوجيا</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">الصفة:</label>
+            <select id="onbRole" class="w-full px-3 py-2.5 rounded-xl text-xs bg-slate-800 border border-slate-700 text-white">
+              <option>طالب في الدفعة</option>
+              <option>مندوب الفوج</option>
+              <option>مشارك بالملخصات</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-emerald-400 mb-1">كود الدفعة المشترك:</label>
+          <input id="onbCode" type="text" value="STUDY-2026" class="w-full px-3.5 py-2.5 rounded-xl font-mono text-xs bg-slate-950 border border-emerald-500/40 text-emerald-300 outline-none" />
+        </div>
+        <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-sm">دخول إلى منصة الدفعة الآن</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- نافذة دعوة الأصدقاء وإدخالهم -->
+  <div id="inviteModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900 p-5 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-base text-emerald-400">👤+ دعوة الأصدقاء وإدخالهم للدفعة</h3>
+        <button onclick="closeInviteModal()" class="px-2 py-1 rounded-lg bg-slate-800 text-slate-400">✕</button>
+      </div>
+      <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-slate-300 font-bold">كود الدفعة المشترك:</span>
+          <span id="inviteCodeText" class="font-mono font-bold text-emerald-400 px-2 py-0.5 rounded bg-emerald-500/15">STUDY-2026</span>
+        </div>
+        <button onclick="copyInviteLink(this)" class="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold">📋 نسخ رابط المنصة مع كود الدفعة</button>
+      </div>
+      <form onsubmit="addFriendDirectly(event)" class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+        <label class="block text-xs font-bold text-amber-400">إدخال صديق بالاسم مباشرة لقائمة الفوج:</label>
+        <div class="flex gap-2">
+          <input id="newFriendName" type="text" required placeholder="اسم زميلك (مثال: وليد مرابط)..." class="flex-1 px-3 py-2 rounded-xl text-xs bg-slate-900 border border-slate-700 text-white outline-none" />
+          <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">إضافة +</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- نافذة رفع ملف أو صورة -->
+  <div id="uploadModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900 p-5 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-sm text-indigo-300">📎 نشر ملف PDF أو مخطط دراسي</h3>
+        <button onclick="closeUploadModal()" class="px-2 py-1 rounded-lg bg-slate-800 text-slate-400">✕</button>
+      </div>
+      <form onsubmit="submitUpload(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">اختر ملفاً من جهازك أو هاتفك:</label>
+          <input id="realFileInput" type="file" onchange="handleFileInput(event)" class="w-full text-xs text-slate-300 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-600 file:text-white" />
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">عنوان الدرس أو الملخص:</label>
+          <input id="upTitle" type="text" placeholder="مثال: ملخص_قوانين_الكهرباء.pdf" class="w-full px-3 py-2 rounded-xl text-xs bg-slate-800 border border-slate-700 text-white outline-none" />
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">ملاحظة أو شرح مرفق:</label>
+          <textarea id="upNotes" rows="2" placeholder="اكتب توضيحاً لزملائك..." class="w-full px-3 py-2 rounded-xl text-xs bg-slate-800 border border-slate-700 text-white outline-none"></textarea>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" onclick="closeUploadModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-xs">إلغاء</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold">نشر في القناة والمكتبة</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- نافذة معاينة الملفات والصور -->
+  <div id="previewModal" onclick="closePreviewModal()" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div onclick="event.stopPropagation()" class="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl space-y-3">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 id="previewTitle" class="font-bold text-sm text-indigo-300">معاينة الملف</h3>
+        <button onclick="closePreviewModal()" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300">✕</button>
+      </div>
+      <div id="previewBody" class="space-y-2"></div>
+    </div>
+  </div>
+
+  <script>
+    const SUBJECTS = [{"id":"elec-mech","name":"الإلكتروميكانيك والأنظمة","code":"ELM-301","icon":"⚡","color":"from-blue-500 to-indigo-600","onlineCount":48,"channels":[{"id":"general","name":"النقاش العام","type":"chat","icon":"💬","unread":3},{"id":"lectures","name":"المحاضرات والملخصات","type":"files","icon":"📚","unread":1},{"id":"exams","name":"الامتحانات والتمارين","type":"exams","icon":"📝","unread":0},{"id":"voice","name":"الشروحات الصوتية","type":"voice","icon":"🎙️","unread":2}]},{"id":"c-prog","name":"البرمجة والخوارزميات (C)","code":"INF-204","icon":"💻","color":"from-emerald-500 to-teal-600","onlineCount":62,"channels":[{"id":"general","name":"النقاش العام","type":"chat","icon":"💬","unread":0},{"id":"lectures","name":"المحاضرات والملخصات","type":"files","icon":"📚","unread":4},{"id":"exams","name":"الامتحانات والتمارين","type":"exams","icon":"📝","unread":1},{"id":"voice","name":"الشروحات الصوتية","type":"voice","icon":"🎙️","unread":0}]},{"id":"math-linear","name":"الرياضيات والجبر الخطي","code":"MAT-102","icon":"📐","color":"from-purple-500 to-violet-600","onlineCount":35,"channels":[{"id":"general","name":"النقاش العام","type":"chat","icon":"💬","unread":0},{"id":"lectures","name":"المحاضرات والملخصات","type":"files","icon":"📚","unread":0},{"id":"exams","name":"الامتحانات والتمارين","type":"exams","icon":"📝","unread":2},{"id":"voice","name":"الشروحات الصوتية","type":"voice","icon":"🎙️","unread":0}]},{"id":"physics-elec","name":"الفيزياء والكهرباء العامة","code":"PHY-105","icon":"🧲","color":"from-amber-500 to-orange-600","onlineCount":29,"channels":[{"id":"general","name":"النقاش العام","type":"chat","icon":"💬","unread":5},{"id":"lectures","name":"المحاضرات والملخصات","type":"files","icon":"📚","unread":0},{"id":"exams","name":"الامتحانات والتمارين","type":"exams","icon":"📝","unread":0},{"id":"voice","name":"الشروحات الصوتية","type":"voice","icon":"🎙️","unread":1}]}];
+    let messages = JSON.parse(localStorage.getItem('sg_messages_v2')) || [{"id":"m1","subjectId":"elec-mech","channelId":"general","sender":"أحمد بن علي","role":"مندوب الدفعة","roleBadgeColor":"bg-amber-500/20 text-amber-300 border-amber-500/30","avatar":"أح","avatarBg":"bg-indigo-600","time":"09:15 ص","tag":"#ملخص","isPinned":true,"text":"السلام عليكم زملائي 👋، قمت برفع ملخص شامل للفصل الثاني حول الدارات الانتقالية (شحن وتفريغ المكثفة RC و RL) مع القوانين الأساسية التي ركز عليها الأستاذ في المحاضرة اليوم.","type":"pdf","fileData":{"title":"ملخص_الدارات_الكهربائية_RC_RL_السداسي_الأول.pdf","size":"2.4 MB","pages":14,"category":"ملخص محاضرة","previewContent":["1. المعادلة التفاضلية لشحن مكثفة: RC (dUc/dt) + Uc = E","2. عبارة التوتر لحظة الشحن: Uc(t) = E * (1 - exp(-t / τ)) حيث τ = R * C","3. ثابت الزمن τ: هو الزمن اللازم لبلوغ التوتر بنسبة 63% من قيمته الأعظمية E.","4. الطاقة المخزنة في المكثفة: Ec = 1/2 * C * Uc² (تقدر بالجول J)."]},"reactions":{"👍":18,"🔥":9,"💡":6}},{"id":"m2","subjectId":"elec-mech","channelId":"general","sender":"سارة منصوري","role":"طالبة متميزة","roleBadgeColor":"bg-emerald-500/20 text-emerald-300 border-emerald-500/30","avatar":"سم","avatarBg":"bg-emerald-600","time":"09:24 ص","tag":"#شرح_صوتي","isPinned":false,"text":"لمن سأل عن كيفية استخراج ثابت الزمن τ بيانياً من المنحنى في التمرين الثالث، سجلت لكم هذا الشرح الصوتي السريع مع الرسم التوضيحي 👇","type":"voice","voiceData":{"title":"شرح استخراج ثابت الزمن τ بيانياً من المماس عند t=0","duration":42,"waveform":[25,45,70,40,85,95,60,50,80,90,65,35,75,88,55,40,65,92,70,45,30,60,75,50,35],"audioUrl":null},"reactions":{"👍":14,"🔥":11,"💡":15}},{"id":"m3","subjectId":"elec-mech","channelId":"general","sender":"ياسين بوزيد","role":"طالب","roleBadgeColor":"bg-slate-500/20 text-slate-300 border-slate-500/30","avatar":"يب","avatarBg":"bg-sky-600","time":"09:32 ص","tag":"#سؤال","isPinned":false,"text":"هذا هو المخطط الذي رسمه الأستاذ على السبورة اليوم مع منحنى الشحن، هل قيمة المقاومة R تؤثر على القيمة النهائية للتوتر أم على سرعة الشحن فقط؟","type":"image","imageData":{"title":"مخطط دارة الشحن RC والمنحنى البياني","caption":"صورة السبورة - المحاضرة رقم 04 (الأستاذ كمال)","url":"data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22800%22%20height%3D%22450%22%20viewBox%3D%220%200%20800%20450%22%3E%0A%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230f172a%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%231e293b%22%2F%3E%0A%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%20%20%3Cpattern%20id%3D%22grid%22%20width%3D%2230%22%20height%3D%2230%22%20patternUnits%3D%22userSpaceOnUse%22%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M%2030%200%20L%200%200%200%2030%22%20fill%3D%22none%22%20stroke%3D%22%23334155%22%20stroke-width%3D%220.7%22%20stroke-opacity%3D%220.5%22%2F%3E%0A%20%20%20%20%20%20%3C%2Fpattern%3E%0A%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%3Crect%20width%3D%22800%22%20height%3D%22450%22%20fill%3D%22url(%23bg)%22%2F%3E%0A%20%20%20%20%3Crect%20width%3D%22800%22%20height%3D%22450%22%20fill%3D%22url(%23grid)%22%2F%3E%0A%20%20%20%20%0A%20%20%20%20%3C!--%20%D8%A5%D8%B7%D8%A7%D8%B1%20%D8%A7%D9%84%D9%85%D8%AE%D8%B7%D8%B7%20--%3E%0A%20%20%20%20%3Crect%20x%3D%2230%22%20y%3D%2230%22%20width%3D%22740%22%20height%3D%22390%22%20rx%3D%2216%22%20fill%3D%22none%22%20stroke%3D%22%233b82f6%22%20stroke-width%3D%222%22%20stroke-opacity%3D%220.6%22%2F%3E%0A%20%20%20%20%0A%20%20%20%20%3C!--%20%D8%B1%D8%B3%D9%85%20%D8%AF%D8%A7%D8%B1%D8%A9%20%D9%83%D9%87%D8%B1%D8%A8%D8%A7%D8%A6%D9%8A%D8%A9%20RC%20%D8%AA%D9%88%D8%B6%D9%8A%D8%AD%D9%8A%D8%A9%20--%3E%0A%20%20%20%20%3Cg%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%223.5%22%20fill%3D%22none%22%20transform%3D%22translate(80%2C%20120)%22%3E%0A%20%20%20%20%20%20%3C!--%20%D9%85%D9%86%D8%A8%D8%B9%20%D8%A7%D9%84%D8%AA%D9%88%D8%AA%D8%B1%20E%20--%3E%0A%20%20%20%20%20%20%3Cline%20x1%3D%2260%22%20y1%3D%2240%22%20x2%3D%2260%22%20y2%3D%2290%22%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2260%22%20cy%3D%22115%22%20r%3D%2225%22%20stroke%3D%22%23f59e0b%22%20fill%3D%22%230f172a%22%2F%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2260%22%20y%3D%22122%22%20fill%3D%22%23f59e0b%22%20font-size%3D%2218%22%20font-family%3D%22sans-serif%22%20text-anchor%3D%22middle%22%20stroke%3D%22none%22%20font-weight%3D%22bold%22%3EE%20%3D%2012V%3C%2Ftext%3E%0A%20%20%20%20%20%20%3Cline%20x1%3D%2260%22%20y1%3D%22140%22%20x2%3D%2260%22%20y2%3D%22200%22%2F%3E%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%3C!--%20%D8%A7%D9%84%D8%B3%D9%84%D9%83%20%D8%A7%D9%84%D8%B9%D9%84%D9%88%D9%8A%20%D9%88%D8%A7%D9%84%D9%85%D9%82%D8%A7%D9%88%D9%85%D8%A9%20R%20--%3E%0A%20%20%20%20%20%20%3Cline%20x1%3D%2260%22%20y1%3D%2240%22%20x2%3D%22160%22%20y2%3D%2240%22%2F%3E%0A%20%20%20%20%20%20%3Cpolyline%20points%3D%22160%2C40%20170%2C25%20185%2C55%20200%2C25%20215%2C55%20230%2C25%20245%2C55%20255%2C40%22%20stroke%3D%22%2310b981%22%2F%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22207%22%20y%3D%2215%22%20fill%3D%22%2310b981%22%20font-size%3D%2216%22%20font-family%3D%22sans-serif%22%20text-anchor%3D%22middle%22%20stroke%3D%22none%22%20font-weight%3D%22bold%22%3ER%20%3D%201%20k%CE%A9%3C%2Ftext%3E%0A%20%20%20%20%20%20%3Cline%20x1%3D%22255%22%20y1%3D%2240%22%20x2%3D%22360%22%20y2%3D%2240%22%2F%3E%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%3C!--%20%D8%A7%D9%84%D9%85%D9%83%D8%AB%D9%81%D8%A9%20C%20--%3E%0A%20%20%20%20%20%20%3Cline%20x1%3D%22360%22%20y1%3D%2240%22%20x2%3D%22360%22%20y2%3D%22105%22%2F%3E%0A%20%20%20%20%20%20%3Cline%20x1%3D%22335%22%20y1%3D%22105%22%20x2%3D%22385%22%20y2%3D%22105%22%20stroke%3D%22%23ec4899%22%20stroke-width%3D%225%22%2F%3E%0A%20%20%20%20%20%20%3Cline%20x1%3D%22335%22%20y1%3D%22125%22%20x2%3D%22385%22%20y2%3D%22125%22%20stroke%3D%22%23ec4899%22%20stroke-width%3D%225%22%2F%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22430%22%20y%3D%22120%22%20fill%3D%22%23ec4899%22%20font-size%3D%2216%22%20font-family%3D%22sans-serif%22%20stroke%3D%22none%22%20font-weight%3D%22bold%22%3EC%20%3D%20100%C2%B5F%3C%2Ftext%3E%0A%20%20%20%20%20%20%3Cline%20x1%3D%22360%22%20y1%3D%22125%22%20x2%3D%22360%22%20y2%3D%22200%22%2F%3E%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%3C!--%20%D8%A7%D9%84%D8%B3%D9%84%D9%83%20%D8%A7%D9%84%D8%B3%D9%81%D9%84%D9%8A%20--%3E%0A%20%20%20%20%20%20%3Cline%20x1%3D%2260%22%20y1%3D%22200%22%20x2%3D%22360%22%20y2%3D%22200%22%2F%3E%0A%20%20%20%20%3C%2Fg%3E%0A%0A%20%20%20%20%3C!--%20%D9%85%D9%86%D8%AD%D9%86%D9%89%20%D8%B4%D8%AD%D9%86%20%D8%A7%D9%84%D9%85%D9%83%D8%AB%D9%81%D8%A9%20Uc(t)%20--%3E%0A%20%20%20%20%3Cg%20transform%3D%22translate(500%2C%20130)%22%3E%0A%20%20%20%20%20%20%3Cline%20x1%3D%220%22%20y1%3D%22180%22%20x2%3D%22220%22%20y2%3D%22180%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%2F%3E%0A%20%20%20%20%20%20%3Cline%20x1%3D%220%22%20y1%3D%22180%22%20x2%3D%220%22%20y2%3D%2210%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%2F%3E%0A%20%20%20%20%20%20%3Cline%20x1%3D%220%22%20y1%3D%2230%22%20x2%3D%22210%22%20y2%3D%2230%22%20stroke%3D%22%23f59e0b%22%20stroke-width%3D%221.5%22%20stroke-dasharray%3D%226%2C6%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M%200%20180%20Q%2045%2035%20205%2032%22%20fill%3D%22none%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%224%22%2F%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22110%22%20y%3D%22210%22%20fill%3D%22%23cbd5e1%22%20font-size%3D%2214%22%20font-family%3D%22sans-serif%22%20text-anchor%3D%22middle%22%3E%D8%A7%D9%84%D8%B2%D9%85%D9%86%20t%20(ms)%3C%2Ftext%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2235%22%20y%3D%2222%22%20fill%3D%22%23f59e0b%22%20font-size%3D%2214%22%20font-family%3D%22sans-serif%22%3EUc(t)%20%3D%20E(1%20-%20e%5E-t%2F%CF%84)%3C%2Ftext%3E%0A%20%20%20%20%3C%2Fg%3E%0A%0A%20%20%20%20%3C!--%20%D8%A7%D9%84%D8%B9%D9%86%D9%88%D8%A7%D9%86%20--%3E%0A%20%20%20%20%3Ctext%20x%3D%22740%22%20y%3D%2275%22%20fill%3D%22%23f8fafc%22%20font-size%3D%2224%22%20font-family%3D%22sans-serif%22%20text-anchor%3D%22end%22%20font-weight%3D%22bold%22%3E%D8%AF%D8%A7%D8%B1%D8%A9%20%D8%B4%D8%AD%D9%86%20%D9%88%D8%AA%D9%81%D8%B1%D9%8A%D8%BA%20%D8%A7%D9%84%D9%85%D9%83%D8%AB%D9%81%D8%A9%20RC%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22740%22%20y%3D%22105%22%20fill%3D%22%2394a3b8%22%20font-size%3D%2216%22%20font-family%3D%22sans-serif%22%20text-anchor%3D%22end%22%3E%D8%A7%D9%84%D9%85%D8%AD%D8%A7%D8%B6%D8%B1%D8%A9%2004%3A%20%D8%A7%D9%84%D8%A3%D9%86%D8%B8%D9%85%D8%A9%20%D8%A7%D9%84%D8%A7%D9%86%D8%AA%D9%82%D8%A7%D9%84%D9%8A%D8%A9%20%D9%88%D8%AB%D8%A7%D8%A8%D8%AA%20%D8%A7%D9%84%D8%B2%D9%85%D9%86%20%CF%84%3C%2Ftext%3E%0A%20%20%3C%2Fsvg%3E"},"reactions":{"👍":7,"🔥":2,"💡":9}},{"id":"m4","subjectId":"elec-mech","channelId":"lectures","sender":"أحمد بن علي","role":"مندوب الدفعة","roleBadgeColor":"bg-amber-500/20 text-amber-300 border-amber-500/30","avatar":"أح","avatarBg":"bg-indigo-600","time":"أمس","tag":"#ملخص","isPinned":true,"text":"الكتاب المرجعي الكامل لمقياس الإلكتروميكانيك والآلات الكهربائية بصيغة PDF واضحة للطباعة.","type":"pdf","fileData":{"title":"المحولات_والآلات_الكهربائية_الجزء_الأول.pdf","size":"5.8 MB","pages":48,"category":"مرجع رسمي","previewContent":["الفصل الأول: الدارات المغناطيسية وقانون فاراداي للتحريض الكهرومغناطيسي.","الفصل الثاني: المحولات الكهربائية أحادية الطور والتمثيل المكافئ (نموذج كاب).","الفصل الثالث: حساب المردود والضياعات الحديدية والضياعات بمفعول جول."]},"reactions":{"👍":32,"🔥":14,"💡":8}},{"id":"m5","subjectId":"elec-mech","channelId":"exams","sender":"ريان قاسمي","role":"طالب","roleBadgeColor":"bg-slate-500/20 text-slate-300 border-slate-500/30","avatar":"رق","avatarBg":"bg-purple-600","time":"منذ يومين","tag":"#امتحان","isPinned":true,"text":"موضوع الامتحان النهائي للعام الماضي (2024/2025) مرفق بالحل النموذجي وسلم التنقيط الرسمي.","type":"pdf","fileData":{"title":"امتحان_السداسي_الأول_إلكتروميكانيك_مع_الحل.pdf","size":"1.9 MB","pages":6,"category":"امتحان سابق","previewContent":["التمرين الأول (06 نقاط): دراسة نظام انتقالي لدارة RL وتحديد عبارة التيار i(t).","التمرين الثاني (08 نقاط): محول أحادي الطور 220V/24V - تجربة الفراغ وتجربة القصر.","التمرين الثالث (06 نقاط): أسئلة نظرية حول مبدأ عمل المحرك اللاتزامني ثلاثي الطور."]},"reactions":{"👍":41,"🔥":22,"💡":12}},{"id":"m6","subjectId":"elec-mech","channelId":"voice","sender":"سارة منصوري","role":"طالبة متميزة","roleBadgeColor":"bg-emerald-500/20 text-emerald-300 border-emerald-500/30","avatar":"سم","avatarBg":"bg-emerald-600","time":"11:40 ص","tag":"#شرح_صوتي","isPinned":true,"text":"مراجعة صوتية مركزة في أقل من دقيقة لأهم قوانين المحول الكهربائي المثالي والحقيقي قبل حصة الأعمال الموجهة (TD).","type":"voice","voiceData":{"title":"ملخص قوانين المحول الكهربائي ونسبة التحويل m","duration":55,"waveform":[35,65,80,50,90,75,40,85,95,70,55,80,60,45,90,85,65,50,75,60,40,85,70,50,40],"audioUrl":null},"reactions":{"👍":24,"🔥":16,"💡":19}},{"id":"m7","subjectId":"c-prog","channelId":"general","sender":"كريم بن يطو","role":"مندوب الدفعة","roleBadgeColor":"bg-amber-500/20 text-amber-300 border-amber-500/30","avatar":"كب","avatarBg":"bg-teal-600","time":"10:05 ص","tag":"#ملخص","isPinned":true,"text":"ملخص شامل للمؤشرات (Pointers) وحجز الذاكرة الديناميكي (malloc / free) في لغة C مع أمثلة تطبيقية مصححة.","type":"pdf","fileData":{"title":"الدليل_العملي_للمؤشرات_Pointers_في_لغة_C.pdf","size":"3.1 MB","pages":18,"category":"ملخص برمجي","previewContent":["1. تعريف المؤشر: متغير يخزن عنوان ذاكرة متغير آخر (مثال: int *ptr = &x;).","2. الفرق بين ptr و *ptr: الأول يعطي العنوان في الذاكرة والثاني يعطي القيمة المخزنة.","3. الحجز الديناميكي للمصفوفات: int *arr = (int*) malloc(n * sizeof(int));"]},"reactions":{"👍":29,"🔥":17,"💡":11}}];
+    let students = JSON.parse(localStorage.getItem('sg_students_v2')) || [{"uid":"student-1","name":"أحمد بن علي","group":"الفوج 01 - إلكتروميكانيك","role":"مندوب الدفعة","avatar":"أح","avatarBg":"bg-indigo-600","status":"متصل الآن • يراجع المحاضرات","roomCode":"STUDY-2026","isOnline":true},{"uid":"student-2","name":"سارة منصوري","group":"الفوج 02 - إلكتروميكانيك","role":"طالبة متميزة","avatar":"سم","avatarBg":"bg-emerald-600","status":"متصلة الآن • تسجل شرحاً صوتياً","roomCode":"STUDY-2026","isOnline":true},{"uid":"student-3","name":"ياسين بوزيد","group":"الفوج 01 - إلكتروميكانيك","role":"طالب","avatar":"يب","avatarBg":"bg-sky-600","status":"متصل الآن • في غرفة النقاش","roomCode":"STUDY-2026","isOnline":true},{"uid":"student-4","name":"كريم بن يطو","group":"الفوج 03 - إعلام آلي","role":"مندوب الفوج","avatar":"كب","avatarBg":"bg-teal-600","status":"متصل منذ 5 دقائق","roomCode":"STUDY-2026","isOnline":true}];
+    const FLASHCARDS = [{"q":"ما هي عبارة ثابت الزمن τ في دارة كهربائية تضم مقاومة R ومكثفة C؟","a":"τ = R × C (ويقدر بالثانية s حيث يمثل الزمن اللازم لشحن المكثفة بنسبة 63.2%)"},{"q":"ما هي عبارة ثابت الزمن τ في دارة تضم مقاومة R ووشيعة ذاتيتها L؟","a":"τ = L / R (ويقدر بالثانية s)"},{"q":"في لغة C، ما هو الفرق بين المعامل (&) والمعامل (*) عند التعامل مع المؤشرات؟","a":"المعامل (&) يعطي عنوان المتغير في الذاكرة، بينما (*) يصل إلى القيمة المخزنة داخل ذلك العنوان."},{"q":"ما هي علاقة نسبة التحويل m في المحول الكهربائي المثالي؟","a":"m = N2 / N1 = U20 / U1 = I1 / I2"}];
+    let profile = JSON.parse(localStorage.getItem('sg_profile_v2')) || {"name":"طالب جامعي","group":"الفوج 01 - إلكتروميكانيك","role":"عضو الدفعة","avatar":"طج","avatarBg":"bg-indigo-600","isRegistered":false};
+    let roomCode = localStorage.getItem('sg_room_v2') || 'STUDY-2026';
+
+    let activeSubjectId = 'elec-mech';
+    let activeChannelId = 'general';
+    let expandedSubjects = { 'elec-mech': true, 'c-prog': true, 'math-linear': false, 'physics-elec': false };
+    let selectedTag = '#سؤال';
+    let searchQuery = '';
+    let leftTab = 'members';
+    let flashIdx = 0;
+    let flashFlipped = false;
+    let pomoSeconds = 25 * 60;
+    let pomoRunning = false;
+    let recInterval = null;
+    let recSeconds = 0;
+    let pendingUploadData = null;
+
+    function saveState() {
+      try {
+        localStorage.setItem('sg_messages_v2', JSON.stringify(messages));
+        localStorage.setItem('sg_students_v2', JSON.stringify(students));
+        localStorage.setItem('sg_profile_v2', JSON.stringify(profile));
+        localStorage.setItem('sg_room_v2', roomCode);
+      } catch (e) {}
+    }
+
+    function initApp() {
+      if (profile && profile.isRegistered) {
+        document.getElementById('onboardingModal').classList.add('hidden');
+      }
+      updateProfileUI();
+      renderSubjects();
+      renderTags();
+      renderMessages();
+      renderLeftDrawer();
+      setInterval(() => {
+        if (pomoRunning && pomoSeconds > 0) {
+          pomoSeconds--;
+          const m = String(Math.floor(pomoSeconds / 60)).padStart(2, '0');
+          const s = String(pomoSeconds % 60).padStart(2, '0');
+          document.getElementById('headerPomodoro').innerText = m + ':' + s;
+          const timerEl = document.getElementById('drawerPomoTimer');
+          if (timerEl) timerEl.innerText = m + ':' + s;
+        }
+      }, 1000);
+    }
+
+    function updateProfileUI() {
+      document.getElementById('profileName').innerText = profile.name;
+      document.getElementById('profileGroup').innerText = profile.group;
+      document.getElementById('profileAvatar').innerText = profile.avatar;
+      document.getElementById('headerRoomBadge').innerText = roomCode;
+      document.getElementById('sidebarRoomCode').innerText = roomCode;
+      document.getElementById('inviteCodeText').innerText = roomCode;
+      document.getElementById('headerStudentsCount').innerText = students.length;
+    }
+
+    function renderSubjects() {
+      const container = document.getElementById('subjectsContainer');
+      container.innerHTML = SUBJECTS.map(sub => {
+        const isExp = expandedSubjects[sub.id];
+        const isAct = activeSubjectId === sub.id;
+        return `
+          <div class="rounded-2xl border ${isAct ? 'bg-slate-800/60 border-indigo-500/40' : 'bg-slate-900/40 border-slate-800'} overflow-hidden">
+            <button onclick="toggleSub('${sub.id}')" class="w-full p-3 flex items-center justify-between text-right">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <span class="w-9 h-9 rounded-xl bg-gradient-to-br ${sub.color} flex items-center justify-center text-lg shrink-0">${sub.icon}</span>
+                <div class="truncate">
+                  <div class="font-bold text-xs truncate">${sub.name}</div>
+                  <div class="text-[11px] text-emerald-400">${sub.code} • ${sub.onlineCount} متصل</div>
+                </div>
+              </div>
+              <span class="text-xs text-slate-400">${isExp ? '▲' : '▼'}</span>
+            </button>
+            ${isExp ? `<div class="px-2 pb-2.5 space-y-1">
+              ${sub.channels.map(ch => {
+                const sel = activeSubjectId === sub.id && activeChannelId === ch.id;
+                return `<button onclick="selectChan('${sub.id}', '${ch.id}')" class="w-full px-3 py-2 rounded-xl text-xs flex items-center justify-between ${sel ? 'bg-indigo-600 text-white font-bold' : 'text-slate-300 hover:bg-slate-800'}">
+                  <span>${ch.icon} ${ch.name}</span>
+                  ${ch.unread > 0 && !sel ? `<span class="px-1.5 py-0.5 text-[10px] rounded-full bg-indigo-500/20 text-indigo-300">${ch.unread}</span>` : ''}
+                </button>`;
+              }).join('')}
+            </div>` : ''}
+          </div>
+        `;
+      }).join('');
+
+      const curSub = SUBJECTS.find(s => s.id === activeSubjectId) || SUBJECTS[0];
+      const curChan = curSub.channels.find(c => c.id === activeChannelId) || curSub.channels[0];
+      document.getElementById('activeChannelIcon').innerText = curChan.icon;
+      document.getElementById('activeChannelName').innerText = curChan.name;
+      document.getElementById('activeSubjectBadge').innerText = curSub.name;
+    }
+
+    function toggleSub(id) {
+      expandedSubjects[id] = !expandedSubjects[id];
+      renderSubjects();
+    }
+
+    function selectChan(sId, cId) {
+      activeSubjectId = sId;
+      activeChannelId = cId;
+      renderSubjects();
+      renderMessages();
+      renderLeftDrawer();
+    }
+
+    function renderTags() {
+      const tags = ['#سؤال', '#ملخص', '#شرح_صوتي', '#امتحان', '#تنبيه'];
+      document.getElementById('tagsBar').innerHTML = tags.map(t => `
+        <button type="button" onclick="setTag('${t}')" class="px-2.5 py-0.5 rounded-lg text-[11px] font-medium ${selectedTag === t ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400'}">${t}</button>
+      `).join('');
+    }
+
+    function setTag(t) { selectedTag = t; renderTags(); }
+
+    function handleSearch(val) { searchQuery = val.toLowerCase(); renderMessages(); }
+
+    function renderMessages() {
+      const list = document.getElementById('messagesList');
+      const filtered = messages.filter(m => {
+        const matchSub = m.subjectId === activeSubjectId && m.channelId === activeChannelId;
+        const matchQ = !searchQuery || (m.text && m.text.toLowerCase().includes(searchQuery)) || (m.sender && m.sender.toLowerCase().includes(searchQuery)) || (m.fileData && m.fileData.title.toLowerCase().includes(searchQuery));
+        return matchSub && matchQ;
+      });
+
+      if (filtered.length === 0) {
+        list.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-slate-400 py-16"><p class="text-sm font-bold">لا توجد رسائل في هذه القناة بعد</p><p class="text-xs mt-1">كن أول من يشارك ملخصاً أو شرحاً صوتياً لزملائك!</p></div>';
+        return;
+      }
+
+      list.innerHTML = filtered.map(msg => `
+        <div class="p-3.5 rounded-2xl border ${msg.isPinned ? 'bg-slate-900/95 border-amber-500/40' : 'bg-slate-900/70 border-slate-800'}">
+          <div class="flex items-start justify-between gap-2 mb-2">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl ${msg.avatarBg || 'bg-indigo-600'} text-white font-bold text-xs flex items-center justify-center">${msg.avatar || 'ط'}</div>
+              <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="font-bold text-xs sm:text-sm">${msg.sender}</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">${msg.role || 'طالب'}</span>
+                  <span class="text-[10px] font-bold text-indigo-400">${msg.tag || ''}</span>
+                </div>
+                <span class="text-[10px] text-slate-400">${msg.time}</span>
+              </div>
+            </div>
+            <button onclick="togglePin('${msg.id}')" class="p-1.5 rounded-lg ${msg.isPinned ? 'text-amber-400 bg-amber-500/10' : 'text-slate-500 hover:bg-slate-800'}">📌</button>
+          </div>
+          ${msg.text ? `<p class="text-xs sm:text-sm leading-relaxed mb-3">${msg.text}</p>` : ''}
+          ${msg.type === 'pdf' && msg.fileData ? `
+            <div class="p-3 rounded-xl border bg-slate-950/70 border-slate-800 mb-3 flex items-center justify-between gap-3">
+              <div class="min-w-0">
+                <h4 class="font-bold text-xs sm:text-sm text-rose-300 truncate">📄 ${msg.fileData.title}</h4>
+                <p class="text-[11px] text-slate-400">${msg.fileData.size} • ${msg.fileData.pages || 10} صفحات</p>
+              </div>
+              <button onclick="previewPdf('${msg.id}')" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shrink-0">👁️ معاينة</button>
+            </div>
+          ` : ''}
+          ${msg.type === 'voice' && msg.voiceData ? `
+            <div class="p-3 rounded-xl border bg-emerald-950/20 border-emerald-500/30 mb-3 flex items-center justify-between gap-3">
+              <div>
+                <div class="text-xs font-bold text-emerald-400">🎙️ ${msg.voiceData.title}</div>
+                <div class="text-[11px] text-slate-400">المدة: ${msg.voiceData.duration} ثانية</div>
+              </div>
+              <button onclick="playBeepVoice(this)" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">▶ تشغيل الصوت</button>
+            </div>
+          ` : ''}
+          ${msg.type === 'image' && msg.imageData ? `
+            <div onclick="previewImage('${msg.id}')" class="rounded-xl overflow-hidden border border-slate-700 mb-3 cursor-pointer max-w-lg">
+              <img src="${msg.imageData.url}" class="w-full max-h-60 object-cover" />
+              <div class="p-2 bg-slate-950 text-xs font-bold">${msg.imageData.title}</div>
+            </div>
+          ` : ''}
+          <div class="flex items-center gap-2 pt-1">
+            ${['👍', '🔥', '💡'].map(em => `
+              <button onclick="reactMsg('${msg.id}', '${em}')" class="px-2.5 py-1 rounded-lg text-xs bg-slate-800/80 border border-slate-700 hover:border-indigo-500 flex items-center gap-1">
+                <span>${em}</span>
+                <span class="font-bold text-[11px]">${(msg.reactions && msg.reactions[em]) || 0}</span>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+      list.scrollTop = list.scrollHeight;
+    }
+
+    function sendTextMessage(e) {
+      e.preventDefault();
+      const inp = document.getElementById('chatTextInput');
+      if (!inp.value.trim()) return;
+      messages.push({
+        id: 'm-' + Date.now(),
+        subjectId: activeSubjectId,
+        channelId: activeChannelId,
+        sender: profile.name,
+        role: profile.role,
+        avatar: profile.avatar,
+        avatarBg: 'bg-indigo-600',
+        time: 'الآن',
+        tag: selectedTag,
+        isPinned: false,
+        text: inp.value.trim(),
+        type: 'text',
+        reactions: { '👍': 1, '🔥': 0, '💡': 0 }
+      });
+      inp.value = '';
+      saveState();
+      renderMessages();
+      renderLeftDrawer();
+    }
+
+    function reactMsg(id, em) {
+      messages = messages.map(m => {
+        if (m.id !== id) return m;
+        const r = m.reactions || {};
+        return { ...m, reactions: { ...r, [em]: (r[em] || 0) + 1 } };
+      });
+      saveState();
+      renderMessages();
+    }
+
+    function togglePin(id) {
+      messages = messages.map(m => m.id === id ? { ...m, isPinned: !m.isPinned } : m);
+      saveState();
+      renderMessages();
+      renderLeftDrawer();
+    }
+
+    function startRecording() {
+      recSeconds = 0;
+      document.getElementById('recordingBar').classList.remove('hidden');
+      document.getElementById('recordingBar').classList.add('flex');
+      recInterval = setInterval(() => {
+        recSeconds++;
+        const m = String(Math.floor(recSeconds / 60)).padStart(2, '0');
+        const s = String(recSeconds % 60).padStart(2, '0');
+        document.getElementById('recTimer').innerText = m + ':' + s;
+      }, 1000);
+    }
+
+    function cancelRecording() {
+      clearInterval(recInterval);
+      document.getElementById('recordingBar').classList.add('hidden');
+    }
+
+    function finishRecording() {
+      clearInterval(recInterval);
+      const title = document.getElementById('voiceTitleInput').value.trim() || 'شرح صوتي مسجل للدفعة';
+      messages.push({
+        id: 'v-' + Date.now(),
+        subjectId: activeSubjectId,
+        channelId: activeChannelId,
+        sender: profile.name,
+        role: profile.role,
+        avatar: profile.avatar,
+        avatarBg: 'bg-emerald-600',
+        time: 'الآن',
+        tag: '#شرح_صوتي',
+        isPinned: false,
+        text: 'ملاحظة صوتية دراسية جديدة 🎙️',
+        type: 'voice',
+        voiceData: { title, duration: Math.max(5, recSeconds) },
+        reactions: { '👍': 1, '🔥': 1, '💡': 0 }
+      });
+      document.getElementById('voiceTitleInput').value = '';
+      document.getElementById('recordingBar').classList.add('hidden');
+      saveState();
+      renderMessages();
+      renderLeftDrawer();
+    }
+
+    function playBeepVoice(btn) {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.setValueAtTime(520, ctx.currentTime);
+        gain.gain.setValueAtTime(0.05, ctx.currentTime);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(); osc.stop(ctx.currentTime + 0.3);
+      } catch (e) {}
+      btn.innerText = '🔊 جاري التشغيل...';
+      setTimeout(() => { btn.innerText = '▶ تشغيل الصوت'; }, 2500);
+    }
+
+    function renderLeftDrawer() {
+      const subMsgs = messages.filter(m => m.subjectId === activeSubjectId);
+      const pdfs = subMsgs.filter(m => m.type === 'pdf');
+      const voices = subMsgs.filter(m => m.type === 'voice');
+      const imgs = subMsgs.filter(m => m.type === 'image');
+      const pins = subMsgs.filter(m => m.isPinned);
+
+      const tabs = [
+        { id: 'members', label: 'الزملاء', c: students.length },
+        { id: 'pdf', label: 'ملفات', c: pdfs.length },
+        { id: 'voice', label: 'صوتيات', c: voices.length },
+        { id: 'images', label: 'مخططات', c: imgs.length },
+        { id: 'pinned', label: 'مثبتة', c: pins.length },
+        { id: 'tools', label: 'مراجعة', c: null }
+      ];
+
+      document.getElementById('leftTabsBar').innerHTML = tabs.map(t => `
+        <button onclick="switchLeftTab('${t.id}')" class="py-1.5 px-0.5 rounded-lg font-medium text-center ${leftTab === t.id ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-slate-800'}">
+          <div class="truncate">${t.label}</div>
+          ${t.c !== null ? `<span class="text-[9px]">(${t.c})</span>` : ''}
+        </button>
+      `).join('');
+
+      const box = document.getElementById('leftDrawerContent');
+      if (leftTab === 'members') {
+        box.innerHTML = students.map(s => `
+          <div class="p-2.5 rounded-xl border border-slate-800 bg-slate-800/40 flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl ${s.avatarBg || 'bg-indigo-600'} text-white font-bold text-xs flex items-center justify-center shrink-0">${s.avatar}</div>
+            <div class="min-w-0">
+              <div class="font-bold text-xs truncate">${s.name}</div>
+              <div class="text-[10px] text-slate-400 truncate">${s.group}</div>
+              <div class="text-[10px] text-emerald-400 truncate">${s.status || 'متصل الآن'}</div>
+            </div>
+          </div>
+        `).join('');
+      } else if (leftTab === 'pdf') {
+        box.innerHTML = pdfs.map(m => `
+          <div onclick="previewPdf('${m.id}')" class="p-3 rounded-xl border border-slate-800 bg-slate-800/50 cursor-pointer hover:border-indigo-500">
+            <div class="font-bold text-xs text-rose-300 truncate">📄 ${m.fileData.title}</div>
+            <div class="text-[10px] text-slate-400 mt-1">${m.fileData.size} • بواسطة: ${m.sender}</div>
+          </div>
+        `).join('') || '<p class="text-xs text-slate-400 text-center py-8">لا توجد ملفات PDF</p>';
+      } else if (leftTab === 'voice') {
+        box.innerHTML = voices.map(m => `
+          <div class="p-3 rounded-xl border border-slate-800 bg-slate-800/50">
+            <div class="font-bold text-xs text-emerald-400 truncate">🎙️ ${m.voiceData.title}</div>
+            <div class="text-[10px] text-slate-400 mt-1">بواسطة: ${m.sender} (${m.voiceData.duration} ثانية)</div>
+          </div>
+        `).join('') || '<p class="text-xs text-slate-400 text-center py-8">لا توجد شروحات صوتية</p>';
+      } else if (leftTab === 'images') {
+        box.innerHTML = imgs.map(m => `
+          <div onclick="previewImage('${m.id}')" class="rounded-xl overflow-hidden border border-slate-700 cursor-pointer">
+            <img src="${m.imageData.url}" class="w-full h-28 object-cover" />
+            <div class="p-2 bg-slate-900 text-xs font-bold truncate">${m.imageData.title}</div>
+          </div>
+        `).join('') || '<p class="text-xs text-slate-400 text-center py-8">لا توجد مخططات</p>';
+      } else if (leftTab === 'pinned') {
+        box.innerHTML = pins.map(m => `
+          <div class="p-3 rounded-xl border border-amber-500/30 bg-amber-500/5">
+            <div class="text-[11px] font-bold text-amber-400 mb-1">${m.sender}</div>
+            <p class="text-xs">${m.text}</p>
+          </div>
+        `).join('') || '<p class="text-xs text-slate-400 text-center py-8">لا توجد رسائل مثبتة</p>';
+      } else if (leftTab === 'tools') {
+        const card = FLASHCARDS[flashIdx];
+        box.innerHTML = `
+          <div class="p-4 rounded-2xl border border-slate-700 bg-slate-800/60 text-center space-y-2">
+            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300">🎯 مؤقت الدراسة الجماعي Pomodoro</span>
+            <div id="drawerPomoTimer" class="text-3xl font-mono font-extrabold my-2">25:00</div>
+            <button onclick="pomoRunning = !pomoRunning; renderLeftDrawer();" class="px-4 py-1.5 rounded-xl bg-indigo-600 text-white text-xs font-bold">${pomoRunning ? 'إيقاف مؤقت' : 'بدء المراجعة'}</button>
+          </div>
+          <div class="p-4 rounded-2xl border border-slate-700 bg-slate-800/60 space-y-2">
+            <div class="flex justify-between text-xs font-bold text-emerald-400">
+              <span>بطاقات المراجعة Flashcards</span>
+              <span>${flashIdx + 1} / ${FLASHCARDS.length}</span>
+            </div>
+            <div onclick="flashFlipped = !flashFlipped; renderLeftDrawer();" class="min-h-[110px] p-3 rounded-xl border border-slate-700 bg-slate-900 cursor-pointer flex flex-col justify-center text-center">
+              <span class="text-[10px] text-slate-400 mb-1">${flashFlipped ? 'الإجابة النموذجية' : 'اضغط لإظهار الإجابة'}</span>
+              <p class="text-xs font-bold">${flashFlipped ? card.a : card.q}</p>
+            </div>
+            <div class="flex justify-between pt-1">
+              <button onclick="flashFlipped=false; flashIdx=(flashIdx-1+FLASHCARDS.length)%FLASHCARDS.length; renderLeftDrawer();" class="px-3 py-1 rounded-lg bg-slate-700 text-xs">السابق</button>
+              <button onclick="flashFlipped=false; flashIdx=(flashIdx+1)%FLASHCARDS.length; renderLeftDrawer();" class="px-3 py-1 rounded-lg bg-indigo-600 text-white text-xs">التالي</button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function switchLeftTab(t) { leftTab = t; document.getElementById('leftDrawer').classList.remove('hidden'); renderLeftDrawer(); }
+    function toggleLeftDrawer() { document.getElementById('leftDrawer').classList.toggle('hidden'); }
+    function toggleMobileSidebar() {
+      const sb = document.getElementById('rightSidebar');
+      sb.classList.toggle('hidden');
+      sb.classList.toggle('fixed');
+      sb.classList.toggle('inset-y-0');
+      sb.classList.toggle('right-0');
+      sb.classList.toggle('w-72');
+    }
+
+    function openOnboardingModal() { document.getElementById('onboardingModal').classList.remove('hidden'); }
+    function saveOnboarding(e) {
+      e.preventDefault();
+      const name = document.getElementById('onbName').value.trim() || 'طالب جامعي';
+      const group = document.getElementById('onbGroup').value;
+      const role = document.getElementById('onbRole').value;
+      roomCode = (document.getElementById('onbCode').value.trim() || 'STUDY-2026').toUpperCase();
+      profile = { name, group, role, avatar: name.slice(0, 2), isRegistered: true };
+      document.getElementById('onboardingModal').classList.add('hidden');
+      saveState();
+      updateProfileUI();
+    }
+
+    function openInviteModal() { document.getElementById('inviteModal').classList.remove('hidden'); }
+    function closeInviteModal() { document.getElementById('inviteModal').classList.add('hidden'); }
+    function copyInviteLink(btn) {
+      navigator.clipboard.writeText(window.location.href + ' (كود الدفعة: ' + roomCode + ')');
+      btn.innerText = '✅ تم نسخ الرابط وكود الدفعة!';
+      setTimeout(() => { btn.innerText = '📋 نسخ رابط المنصة مع كود الدفعة'; }, 2500);
+    }
+    function addFriendDirectly(e) {
+      e.preventDefault();
+      const name = document.getElementById('newFriendName').value.trim();
+      if (!name) return;
+      students.unshift({ uid: 'f-' + Date.now(), name, group: profile.group, role: 'طالب مدعو', avatar: name.slice(0, 2), avatarBg: 'bg-emerald-600', status: 'متصل الآن • انضم حديثاً' });
+      document.getElementById('newFriendName').value = '';
+      saveState();
+      updateProfileUI();
+      renderLeftDrawer();
+      closeInviteModal();
+    }
+
+    function openUploadModal() { document.getElementById('uploadModal').classList.remove('hidden'); }
+    function closeUploadModal() { document.getElementById('uploadModal').classList.add('hidden'); }
+    function handleFileInput(e) {
+      const f = e.target.files[0];
+      if (!f) return;
+      document.getElementById('upTitle').value = f.name;
+      pendingUploadData = { size: (f.size / (1024 * 1024)).toFixed(2) + ' MB', isImage: f.type.startsWith('image/') };
+      if (pendingUploadData.isImage) {
+        const r = new FileReader();
+        r.onload = () => { pendingUploadData.url = r.result; };
+        r.readAsDataURL(f);
+      }
+    }
+    function submitUpload(e) {
+      e.preventDefault();
+      const title = document.getElementById('upTitle').value.trim() || 'ملخص_محاضرة_جديد.pdf';
+      const notes = document.getElementById('upNotes').value.trim() || 'ملف دراسي مشترك للدفعة';
+      if (pendingUploadData && pendingUploadData.isImage && pendingUploadData.url) {
+        messages.push({
+          id: 'img-' + Date.now(), subjectId: activeSubjectId, channelId: activeChannelId,
+          sender: profile.name, role: profile.role, avatar: profile.avatar, avatarBg: 'bg-indigo-600',
+          time: 'الآن', tag: '#ملخص', text: notes, type: 'image',
+          imageData: { title, caption: notes, url: pendingUploadData.url },
+          reactions: { '👍': 1, '🔥': 1, '💡': 0 }
+        });
+      } else {
+        messages.push({
+          id: 'pdf-' + Date.now(), subjectId: activeSubjectId, channelId: activeChannelId,
+          sender: profile.name, role: profile.role, avatar: profile.avatar, avatarBg: 'bg-indigo-600',
+          time: 'الآن', tag: '#ملخص', text: notes, type: 'pdf',
+          fileData: { title, size: (pendingUploadData && pendingUploadData.size) || '2.1 MB', pages: 12, previewContent: [title, notes] },
+          reactions: { '👍': 1, '🔥': 0, '💡': 1 }
+        });
+      }
+      pendingUploadData = null;
+      document.getElementById('upTitle').value = '';
+      document.getElementById('upNotes').value = '';
+      closeUploadModal();
+      saveState();
+      renderMessages();
+      renderLeftDrawer();
+    }
+
+    function previewPdf(id) {
+      const m = messages.find(x => x.id === id);
+      if (!m || !m.fileData) return;
+      document.getElementById('previewTitle').innerText = '📄 ' + m.fileData.title;
+      document.getElementById('previewBody').innerHTML = (m.fileData.previewContent || ['ملف PDF دراسي مشترك']).map(l => `<p class="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs leading-relaxed">${l}</p>`).join('');
+      document.getElementById('previewModal').classList.remove('hidden');
+    }
+    function previewImage(id) {
+      const m = messages.find(x => x.id === id);
+      if (!m || !m.imageData) return;
+      document.getElementById('previewTitle').innerText = '🖼️ ' + m.imageData.title;
+      document.getElementById('previewBody').innerHTML = `<img src="${m.imageData.url}" class="w-full max-h-[65vh] object-contain rounded-xl" />`;
+      document.getElementById('previewModal').classList.remove('hidden');
+    }
+    function closePreviewModal() { document.getElementById('previewModal').classList.add('hidden'); }
+
+    window.onload = initApp;
+  </script>
+</body>
+</html>
